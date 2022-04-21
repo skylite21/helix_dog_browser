@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import BreedListPage from './BreedListPage';
+import BreedPage from './BreedPage';
+import RandomImagePage from './RandomImagePage';
+import Header from './components/Header';
+import BreedListContext from './BreedListContext';
 import './scss/style.scss';
-import SearchField from './components/SearchField';
 
 const App = () => {
-  const [breedList, setBreedList] = useState([]);
-  const [selectedBreed, setSelectedBreed] = useState(null);
+  // prop drilling problem
+  const [breedListContext, setBreedListContext] = useState([]);
 
   useEffect(() => {
     async function getBreedList() {
@@ -14,31 +19,36 @@ const App = () => {
       const breedList = Object.keys(message).flatMap((key) =>
         message[key].length === 0 ? key : message[key].map((subBreed) => `${subBreed} ${key}`)
       );
-
-      // const breedList = [];
-      // for (let breed in message) {
-      //   if (message[breed].length === 0) {
-      //     breedList.push(breed);
-      //   } else {
-      //     for (const subBereed of message[breed]) {
-      //       breedList.push(subBereed + ' ' + breed);
-      //     }
-      //   }
-      // }
-
       return breedList;
     }
-
     getBreedList().then((list) => {
-      console.log(list);
-      setBreedList(list);
+      setBreedListContext(list);
     });
   }, []);
 
   return (
-    <div>
-      <SearchField options={breedList} placeholder='Search for a breed...' onChange={setSelectedBreed} />
-    </div>
+    <>
+      <BreedListContext.Provider value={[breedListContext, setBreedListContext]}>
+        <BrowserRouter>
+          <Header />
+          <nav className='main-menu'>
+            <Link to='/' className='menu-item'>
+              Home
+            </Link>
+            <Link to='/list' className='menu-item'>
+              Breed List
+            </Link>
+          </nav>
+          <div className='content'>
+            <Routes>
+              <Route path='/' element={<RandomImagePage />} />
+              <Route path='/list' element={<BreedListPage />} />
+              <Route path='/breed/:breed' element={<BreedPage />} />
+            </Routes>
+          </div>
+        </BrowserRouter>
+      </BreedListContext.Provider>
+    </>
   );
 };
 export default App;
