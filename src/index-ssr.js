@@ -1,14 +1,15 @@
 import React, { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
+import { hydrate } from 'react-dom';
 import { BrowserRouter } from 'react-router-dom';
+import { createRoot } from 'react-dom/client';
 import App from './App';
 
-const root = createRoot(document.getElementById('app'));
 // STRICT MODE RENDERS THE COMPONENT TWICE!!
-root.render(
+hydrate(
   <BrowserRouter>
     <App />
-  </BrowserRouter>
+  </BrowserRouter>,
+  document.getElementById('app')
 );
 // root.render(
 //   <StrictMode>

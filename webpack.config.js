@@ -1,3 +1,4 @@
+const webpack = require('webpack');
 const path = require('path'); // old commonJS pattern for importing modules
 const { CleanWebpackPlugin } = require('clean-webpack-plugin'); // npm install --save-dev clean-webpack-plugin
 // const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');  // npm install --save-dev optimize-css-assets-webpack-plugin
@@ -6,6 +7,7 @@ const CopyPlugin = require('copy-webpack-plugin'); // npm install --save-dev cop
 const MiniCssExtractPlugin = require('mini-css-extract-plugin'); // npm install --save-dev mini-css-extract-plugin
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin'); //npm install css-minimizer-webpack-plugin --save-dev
 const TerserPlugin = require('terser-webpack-plugin'); // npm install terser-webpack-plugin --save-dev
+const nodeExternals = require('webpack-node-externals'); // npm install webpack-node-externals --save-dev
 
 const config = {
   // this will be the entry point for the application
@@ -14,7 +16,7 @@ const config = {
     // the file with the path will be created by webpack
     filename: 'bundle.js',
     // this has to be an absolute path './dist' will not work
-    path: path.resolve(__dirname, './dist'),
+    path: path.resolve(__dirname, './dist/frontend'),
     // dont forget the ending slash!
     // this can be replaced to http://mywebsite.com/... for example
     // when the site goes public
@@ -129,6 +131,7 @@ module.exports = (env, argv) => {
   }
 
   if (argv.mode === 'production') {
+    config.output.publicPath = './';
     config.optimization = {
       minimize: true,
       minimizer: [
@@ -138,6 +141,32 @@ module.exports = (env, argv) => {
         new CssMinimizerPlugin()
       ]
     };
+    if (env.ssr) {
+      config.entry = './src/index-ssr';
+      config.output.publicPath = '/frontend/';
+      const serverConfig = {
+        ...config,
+        entry: './src/server/index',
+        target: 'node',
+        externals: [nodeExternals()],
+        output: {
+          path: path.resolve(__dirname, 'dist/backend'),
+          filename: 'server.js'
+        },
+        plugins: [
+          ...config.plugins,
+          new webpack.DefinePlugin({
+            __isBrowser__: 'false'
+          }),
+          new CleanWebpackPlugin({
+            // prevent generating the static assets in the backend folder twice...
+            protectWebpackAssets: false,
+            cleanAfterEveryBuildPatterns: ['img/', '*.*', '!server.js']
+          })
+        ]
+      };
+      return [serverConfig, config];
+    }
   }
 
   return config;
