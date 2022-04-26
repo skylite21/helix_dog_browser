@@ -13,6 +13,8 @@ const RandomImagePage = () => {
 
   const [breedListContext] = useContext(BreedListContext);
 
+  // throw new Error('lol');
+
   // custom hoook előtt:
   // const [imageURL, setImageURL] = useState(null);
   // useEffect(() => {

@@ -4,6 +4,7 @@ import BreedListContext from './BreedListContext';
 
 const BreedListPage = () => {
   const [breedListContext] = useContext(BreedListContext);
+  // throw new Error('asdf');
   return (
     <div className='breed-list'>
       {breedListContext.map((breedListItem, index) => (

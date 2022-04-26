@@ -6,6 +6,7 @@ import RandomImagePage from './RandomImagePage';
 import Header from './components/Header';
 import BreedListContext from './BreedListContext';
 import './scss/style.scss';
+import ErrorBoundary from './components/ErrorBoundary';
 
 const App = () => {
   // prop drilling problem
@@ -42,7 +43,14 @@ const App = () => {
           <div className='content'>
             <Routes>
               <Route path='/' element={<RandomImagePage />} />
-              <Route path='/list' element={<BreedListPage />} />
+              <Route
+                path='/list'
+                element={
+                  <ErrorBoundary>
+                    <BreedListPage />
+                  </ErrorBoundary>
+                }
+              />
               <Route path='/breed/:breed' element={<BreedPage />} />
             </Routes>
           </div>
